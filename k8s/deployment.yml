@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: api-gw-cluster-tenant-1
+  name: api-gw-cluster-tenant-1
+  # namespace: appsecurity-api-gws
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gw-cluster-tenant-1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: api-gw-cluster-tenant-1
+    spec:
+      containers:
+      - image: sadhal/api-gw:0.0.2
+        name: api-gw
+        env:
+        - name: SPRING_CONFIG_NAME
+          value: application,routes
+        - name: SPRING_CONFIG_LOCATION
+          value: file:///deployments/config/
+        - name: SPRING_PROFILES_ACTIVE
+          value: application,routes
+        resources: {}
+        volumeMounts:
+          - name: application-config
+            mountPath: "/deployments/config"
+            readOnly: true
+      volumes:
+        - name: application-config
+          configMap:
+            name: api-gw-cluster-tenant-1
+            items:
+            - key: application-routes.yml
+              path: application-routes.yml
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: api-gw-cluster-tenant-1
+  name: api-gw-cluster-tenant-1
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: api-gw-cluster-tenant-1
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+
+---
+

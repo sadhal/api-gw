@@ -1,0 +1,114 @@
+
+
+spring:
+    cloud:
+        gateway:
+            routes:
+            - id: no_logging_route1
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/get
+              - Header=User-group, \w*blue
+              filters:
+              - AddRequestHeader=X-Request-user-group, blue
+
+            - id: no_logging_route_2
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/get
+              - Header=User-group, \w*red
+              filters:
+              - AddRequestHeader=X-Request-user-group, red
+
+            - id: no_logging_route_3
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/get
+              - Header=User-group-222, \w*
+              filters:
+              - AddRequestHeader=X-Request-user-group, red blue orange
+
+            - id: no_logging_route4
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/get
+              filters:
+              - AddRequestHeader=X-Request-blah, yellow
+
+            - id: auditable_route_1a_coarse_granularity
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/anything/{segment}
+              - Method=POST
+              filters:
+              - AddRequestHeader=X-Request-red, blue
+              - SecurityAbc=säkerhet för _GET_ operation på informationsmängd _anything_, true, true
+              - SetRequestAuthHeader=Authorization, true, true
+              - LoggingWithBody=application/json, application/json, false, false
+
+            - id: auditable_route_1b_coarse_granularity
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/anything/{segment}
+              - Method=GET
+              filters:
+              - AddRequestHeader=X-Request-red, blue
+              - SecurityAbc=säkerhet för _GET_ operation på informationsmängd _anything_, true, true
+              - SetRequestAuthHeader=Authorization, true, true
+              - LoggingNoBody=application/json, false
+
+            # https://cloud.spring.io/spring-cloud-gateway/reference/html/#the-path-route-predicate-factory
+            - id: auditable_route_2_fine_granularity
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/uuid
+              - Method=GET
+              filters:
+              - SecurityAbc=säkerhet för _GET_ operation på informationsmängd _uuid_, true, true
+              - SetRequestAuthHeader=Authorization, true, true
+              - LoggingNoBody=application/json, false
+
+            - id: auditable_route_3_with_circuit_breaker
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/delay/{segment}
+              - Method=GET
+              filters:
+              - SecurityAbc=säkerhet för _GET_ operation på informationsmängd _delay_, true, true
+              - SetRequestAuthHeader=Authorization, true, true
+              - LoggingNoBody=application/json, false
+              - name: CircuitBreaker
+                args:
+                    name: myCircuitBreaker
+                    # fallbackUri: forward:/inCaseOfFailureUseThis
+                    fallbackUri: forward:/delay/0
+
+            - id: auditable_route_4_body_logging
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/delay/{segment}
+              - Method=POST
+              - Header=User-group, \w*blue
+              filters:
+              - SecurityAbc=säkerhet för _POST_ operation på informationsmängd _delay_, true, true
+              - SetRequestAuthHeader=Authorization, true, true
+              - LoggingWithBody=application/json, application/json, false, false
+
+            - id: auditable_route_4_body_logging
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/delay/{segment}
+              - Method=POST
+              filters:
+              - SecurityAbc=säkerhet för _POST_ operation på informationsmängd _delay_, true, true
+              - SetRequestAuthHeader=Authorization, true, true
+              - LoggingWithBody=application/json, application/json, false, false
+              
+
+management.endpoints.web.exposure.include: "*"
+
+server.port: 8080
+
+logging:
+  level:
+    se.sadmir.apigw.filters: DEBUG
