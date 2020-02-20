@@ -45,13 +45,11 @@ public class CacheBodyGatewayFilter implements Ordered, GlobalFilter {
                 DataBufferUtils.retain(dataBuffer);
                 Flux<DataBuffer> cachedFlux = Flux
                     .defer(() -> Flux.just(dataBuffer.slice(0, dataBuffer.readableByteCount())));
-                ServerHttpRequest mutatedRequest = new ServerHttpRequestDecorator(
-                    exchange.getRequest()) {
-                @Override
-                public Flux<DataBuffer> getBody() {
-                    return cachedFlux;
-                }
-
+                ServerHttpRequest mutatedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
+                    @Override
+                    public Flux<DataBuffer> getBody() {
+                        return cachedFlux;
+                    }
                 };
                 exchange.getAttributes().put(CACHE_REQUEST_BODY_OBJECT_KEY, cachedFlux);
 

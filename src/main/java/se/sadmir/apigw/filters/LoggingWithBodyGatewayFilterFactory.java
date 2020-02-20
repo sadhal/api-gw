@@ -3,6 +3,8 @@ package se.sadmir.apigw.filters;
 import java.util.Arrays;
 import java.util.List;
 
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -12,6 +14,7 @@ import org.springframework.cloud.gateway.filter.factory.rewrite.CachedBodyOutput
 import org.springframework.cloud.gateway.support.BodyInserterContext;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -30,7 +33,8 @@ import reactor.core.publisher.Mono;
  * GatewayFilter that modifies the request body.
  */
 @Component
-public class LoggingWithBodyGatewayFilterFactory extends AbstractGatewayFilterFactory<LoggingWithBodyGatewayFilterFactory.Config> {
+public class LoggingWithBodyGatewayFilterFactory
+        extends AbstractGatewayFilterFactory<LoggingWithBodyGatewayFilterFactory.Config> {
 
     final Logger logger = LoggerFactory.getLogger(LoggingWithBodyGatewayFilterFactory.class);
     public static final String CORRELATION_ID_KEY = "skv-correlation-id";
@@ -63,13 +67,14 @@ public class LoggingWithBodyGatewayFilterFactory extends AbstractGatewayFilterFa
                     return Mono.just(o);
                 });
 
-                BodyInserter bodyInserter = BodyInserters.fromPublisher(modifiedBody, String.class);
+                BodyInserter<Mono<String>, ReactiveHttpOutputMessage> bodyInserter = BodyInserters
+                        .fromPublisher(modifiedBody, String.class);
                 HttpHeaders headers = new HttpHeaders();
                 headers.putAll(exchange.getRequest().getHeaders());
 
                 // the new content type will be computed by bodyInserter
                 // and then set in the request decorator
-                // headers.remove(HttpHeaders.CONTENT_LENGTH);
+                headers.remove(HttpHeaders.CONTENT_LENGTH);
 
                 // if the body is changing content types, set it here, to the bodyInserter
                 // will know about it
