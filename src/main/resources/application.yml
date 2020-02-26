@@ -94,7 +94,7 @@ spring:
               - SetRequestAuthHeader=Authorization, true, true
               - LoggingWithBody=application/json, application/json, false, false
 
-            - id: auditable_route_4_body_logging
+            - id: auditable_route_4_body_logging_2
               uri: https://httpbin.org/
               predicates:
               - Path=/delay/{segment}
@@ -103,6 +103,17 @@ spring:
               - SecurityAbc=säkerhet för _POST_ operation på informationsmängd _delay_, true, true
               - SetRequestAuthHeader=Authorization, true, true
               - LoggingWithBody=application/json, application/json, false, false
+
+            - id: auditable_route_5_body_logging_out
+              uri: http://localhost:8080/employee-stream
+              predicates:
+              # - Path=/employee-stream
+              - Header=sadmir-stream-test, \w*
+              - Method=GET
+              filters:
+              - SecurityAbc=säkerhet för _GET_ operation på informationsmängd _bla_, true, true
+              - SetRequestAuthHeader=Authorization, true, true
+              - EnterRecordOutWithBody=application/json, application/json, false, false
               
 
 management.endpoints.web.exposure.include: "*"
