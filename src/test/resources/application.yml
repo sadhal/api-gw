@@ -1,0 +1,17 @@
+
+
+spring:
+    cloud:
+        gateway:
+            routes:
+            - id: no_logging_route1
+              uri: https://httpbin.org/
+              predicates:
+              - Path=/get
+              # - Header=User-group, \w*blue
+              filters:
+              - AddRequestHeader=X-Request-user-group, blue
+
+logging:
+  level:
+    se.sadmir.apigw.filters: DEBUG

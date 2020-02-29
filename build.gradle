@@ -25,6 +25,9 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+	testImplementation('org.springframework.cloud:spring-cloud-starter-contract-stub-runner') {
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-web"
+    }
 }
 
 dependencyManagement {

@@ -53,7 +53,8 @@ public class DemoApplication {
 			.doOnEach(e -> {
 				System.out.println("Employee" + e);
 			})
-			.delayElements(Duration.ofSeconds(3))
+			// .delayElements(Duration.ofSeconds(3))
+			.delayElements(Duration.ofMillis(50))
 			;
 	}
 	
